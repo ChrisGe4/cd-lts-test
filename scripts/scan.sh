@@ -10,6 +10,7 @@ fi
 if [ -z "$_LOCATION" ]; then
   _LOCATION="us-east1"
 fi
+# TODO: change to skaffold-lts
 if [ -z "$_IMAGE" ]; then
   _IMAGE="github"
 fi
@@ -17,6 +18,7 @@ if [ -z "$_BASE_IMAGE" ]; then
 #  _BASE_IMAGE="$_LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPO/"
   _BASE_IMAGE="gcr.io/$PROJECT_ID/$_IMAGE"
 fi
+# if changed, also change in scan.sh.
 OS_VULN_FILE=/workspace/os_vuln.txt
 GREP_TEMPLATE="-e "
 append() {

@@ -4,17 +4,19 @@ steps:
   args: [ '-c', "gcloud secrets versions access latest --secret=lts-test-github-token --format='get(payload.data)' | tr '_-' '/+' | base64 -d > token.txt" ]
 #- name: 'us-east1-docker.pkg.dev/$PROJECT_ID/lts-demo/github'
 #  args: ['repo', 'view','cd-lts-test']
-- name: gcr.io/cloud-builders/gcloud
+- id: scan
+  name: gcr.io/cloud-builders/gcloud
   entrypoint: /bin/bash
   args:
   - ./scripts/scan.sh
-- id: severity check
-  name: gcr.io/cloud-builders/gcloud
+- id: create issue
+  name: 'us-east1-docker.pkg.dev/$PROJECT_ID/lts-demo/github'
   entrypoint: /bin/bash
   args:
   - -c
   - |
     if test -f /workspace/os_vuln.txt; \
-    then echo 'Failed vulnerability check' && exit 1; else exit 0; fi
+    then ./scripts/report.sh; fi
+#    then echo 'Failed vulnerability check' && exit 1; else exit 0; fi
 #- name: 'us-east1-docker.pkg.dev/$PROJECT_ID/lts-demo/github'
 #  args: ['issue', 'create', '--title', 'I found a bug', '--body', 'Nothing works','--repo','ChrisGe4/cd-lts-test']
