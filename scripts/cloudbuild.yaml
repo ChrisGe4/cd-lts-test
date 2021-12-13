@@ -1,5 +1,6 @@
 steps:
-- name: gcr.io/cloud-builders/gcloud
+- id: get github token
+  name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
   args: [ '-c', "gcloud secrets versions access latest --secret=lts-test-github-token --format='get(payload.data)' | tr '_-' '/+' | base64 -d > token.txt" ]
 #- name: 'us-east1-docker.pkg.dev/$PROJECT_ID/lts-demo/github'
@@ -10,7 +11,8 @@ steps:
   args:
   - ./scripts/scan.sh
 - id: create issue
-  name: 'us-east1-docker.pkg.dev/$PROJECT_ID/lts-demo/github'
+#  name: 'us-east1-docker.pkg.dev/$PROJECT_ID/lts-demo/github'
+  name: 'gcr.io/$PROJECT_ID/github'
   entrypoint: /bin/bash
   args:
   - -c

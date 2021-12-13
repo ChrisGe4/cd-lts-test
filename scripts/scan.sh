@@ -18,6 +18,10 @@ if [ -z "$_BASE_IMAGE" ]; then
 #  _BASE_IMAGE="$_LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPO/"
   _BASE_IMAGE="gcr.io/$PROJECT_ID/$_IMAGE"
 fi
+if [ -z "$_TAG_FILTER" ]; then
+  _TAG_FILTER="v*lts"
+fi
+
 # if changed, also change in scan.sh.
 OS_VULN_FILE=/workspace/os_vuln.txt
 GREP_TEMPLATE="-e "
@@ -54,20 +58,21 @@ done
 
 grep_cmd="grep $grep_args"
 echo "${grep_cmd[@]}"
-for tag in $tags; do
-  image=$base_image:$tag
+for tagComma in $tags; do
+  IFS="," read -ra tagArr <<< "${tagComma}"
+  image=$base_image:${tagArr[0]}
   echo ">>>checking vulnerabilities of image:" $image
 #  gcloud artifacts docker images describe $image \
 #    --show-package-vulnerability
     gcloud beta container images describe $image \
-    --show-package-vulnerability | if eval "$grep_cmd"; then append $tag $result_file; fi
+    --show-package-vulnerability | if eval "$grep_cmd"; then append "$base_image":"$tagComma" "$result_file"; fi
 done
 }
 
 echo project id = $PROJECT_ID
 
 # check LTS image
-check_vulnerability $_BASE_IMAGE "v*lts" "$_SEVERITIES" "$OS_VULN_FILE" "$_TAGS"
+check_vulnerability $_BASE_IMAGE "$_TAG_FILTER" "$_SEVERITIES" "$OS_VULN_FILE" "$_TAGS"
 
 
 
